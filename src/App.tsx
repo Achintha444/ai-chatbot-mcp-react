@@ -1,5 +1,6 @@
-import { Bot, MessageCircle, Send, Settings, User } from 'lucide-react';
+import { Bot, Send, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import Hedaer from './components/header';
 
 const GeminiChatbot = () => {
   const [messages, setMessages] = useState([
@@ -105,25 +106,7 @@ const GeminiChatbot = () => {
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
-      <div className="bg-white shadow-lg border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-2 rounded-lg">
-              <MessageCircle className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">AI Assistant</h1>
-              <p className="text-sm text-gray-500">Powered by Google Gemini</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Settings className="w-5 h-5 text-gray-600" />
-          </button>
-        </div>
-      </div>
+      <Hedaer setShowSettings={() => setShowSettings(!showSettings)} />
 
       {/* Settings Panel */}
       {showSettings && (
