@@ -1,5 +1,6 @@
 import { Bot, User } from "lucide-react";
 import type { Message } from "../models/models";
+import ReactMarkdown from 'react-markdown'
 
 /**
  * Props interface for the MessageArea component.
@@ -66,8 +67,7 @@ const MessageArea = (props: MessageAreaProps) => {
                             {getSenderIcon(message.sender)}
                         </div>
                         <div className={
-                            `flex-1 max-w-3xl ${message.sender === 'user' ? 'text-right' : ''}`
-                        }
+                            `flex-1 max-w-3xl ${message.sender === 'user' ? 'text-right' : ''}`}
                         >
                             <div className={`inline-block px-4 py-3 rounded-2xl ${message.sender === 'user'
                                 ? 'bg-blue-500 text-white'
@@ -77,7 +77,9 @@ const MessageArea = (props: MessageAreaProps) => {
                                 }`}
                             >
                                 <p className="whitespace-pre-wrap break-words">
-                                    {message.text}
+                                    <ReactMarkdown>
+                                        {message.text}
+                                    </ReactMarkdown>
                                 </p>
                             </div>
                             <p className={
