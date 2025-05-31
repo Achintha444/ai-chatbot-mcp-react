@@ -26,6 +26,16 @@ export interface AIDataContextProps {
      * Error message from the Gemini AI service call, if any.
      */
     geminiCallError: string | null;
+
+    /**
+     * Enables the Figma MCP (Model Context Provider) integration.
+     */
+    setEnableFigmaMCP: (enable: boolean) => void;
+
+    /**
+     * Indicates whether the Figma MCP integration is enabled.
+     */
+    enableFigmaMCP: boolean;
 }
 
 /**

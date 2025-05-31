@@ -59,7 +59,7 @@ const InputArea = (props: InputAreaProps) => {
                 <button
                     onClick={handleSendMessage}
                     disabled={!inputMessage.trim() || geminiCallLoading}
-                    className="flex-none bg-blue-500 text-white p-3 rounded-2xl hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex-none bg-blue-500 text-white p-3 rounded-2xl hover:bg-blue-600 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
                 >
                     <Send className="w-5 h-5" />
                 </button>
