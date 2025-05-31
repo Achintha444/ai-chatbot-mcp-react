@@ -21,18 +21,18 @@ const Hedaer = (props: HeaderProps) => {
             <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                     <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-2 rounded-lg">
-                        <MessageCircle className="w-6 h-6 text-white" />
+                        <MessageCircle className="w-6 h-6" />
                     </div>
                     <div>
                         <h1 className="text-xl font-bold text-gray-800">AI Assistant</h1>
-                        <p className="text-sm text-gray-500">Powered by Google Gemini</p>
+                        <p className="text-sm text-gray-500">Created by Achintha Isuru</p>
                     </div>
                 </div>
                 <button
                     onClick={setShowSettings}
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                    <Settings className="w-5 h-5 text-gray-600" />
+                    <Settings className="w-5 h-5" />
                 </button>
             </div>
         </div>

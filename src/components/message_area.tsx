@@ -49,29 +49,41 @@ const MessageArea = (props: MessageAreaProps) => {
                 {messages.map((message) => (
                     <div
                         key={message.id}
-                        className={`flex items-start space-x-3 ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
-                            }`}
+                        className={
+                            `flex items-start space-x-3 ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+                            }`
+                        }
                     >
-                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${message.sender === 'user'
-                            ? 'bg-blue-500'
-                            : message.isError
-                                ? 'bg-red-500'
-                                : 'bg-gray-500'
-                            }`}>
+                        <div className={
+                            `flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${message.sender === 'user'
+                                ? 'bg-blue-500'
+                                : message.isError
+                                    ? 'bg-red-500'
+                                    : 'bg-gray-500'
+                            }`
+                        }
+                        >
                             {getSenderIcon(message.sender)}
                         </div>
-                        <div className={`flex-1 max-w-3xl ${message.sender === 'user' ? 'text-right' : ''
-                            }`}>
+                        <div className={
+                            `flex-1 max-w-3xl ${message.sender === 'user' ? 'text-right' : ''}`
+                        }
+                        >
                             <div className={`inline-block px-4 py-3 rounded-2xl ${message.sender === 'user'
                                 ? 'bg-blue-500 text-white'
                                 : message.isError
                                     ? 'bg-red-100 text-red-800 border border-red-200'
                                     : 'bg-white text-gray-800 shadow-sm border border-gray-200'
-                                }`}>
-                                <p className="whitespace-pre-wrap break-words">{message.text}</p>
+                                }`}
+                            >
+                                <p className="whitespace-pre-wrap break-words">
+                                    {message.text}
+                                </p>
                             </div>
-                            <p className={`text-xs text-gray-500 mt-1 ${message.sender === 'user' ? 'text-right' : ''
-                                }`}>
+                            <p className={
+                                `text-xs text-gray-500 mt-1 ${message.sender === 'user' ? 'text-right' : ''
+                                }`}
+                            >
                                 {formatTime(message.timestamp)}
                             </p>
                         </div>

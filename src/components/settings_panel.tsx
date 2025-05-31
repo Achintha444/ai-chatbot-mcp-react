@@ -38,7 +38,7 @@ const SettingsPanel = (props: SettingsPanelProps) => {
                         placeholder="Enter your Google Gemini API key"
                         value={apiKey}
                         onChange={(e) => setApiKey(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
                     />
                     <button
                         onClick={() => setShowSettings(false)}
