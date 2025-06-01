@@ -1,10 +1,12 @@
+
 import { Bot, User } from "lucide-react";
 import type { Message } from "../models/models";
 import ReactMarkdown from 'react-markdown'
 
+
 /**
- * Props interface for the MessageArea component.
- */
+* Props interface for the MessageArea component.
+*/
 interface MessageAreaProps {
     /**
      * Array of messages to display in the message area.
@@ -20,18 +22,21 @@ interface MessageAreaProps {
     messagesEndRef: React.RefObject<HTMLDivElement | null>;
 }
 
+
 /**
- * MessageArea component of the chat application.
- * 
- * @param props - Props injected to the component.
- * @returns 
- */
+* MessageArea component of the chat application.
+*
+* @param props - Props injected to the component.
+* @returns
+*/
 const MessageArea = (props: MessageAreaProps) => {
     const { messages, geminiCallLoading, messagesEndRef } = props;
+
 
     const formatTime = (timestamp: Date) => {
         return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
+
 
     const getSenderIcon = (sender: string) => {
         switch (sender) {
@@ -44,9 +49,10 @@ const MessageArea = (props: MessageAreaProps) => {
         }
     };
 
+
     return (
-        <div className="flex-1 overflow-y-auto p-4">
-            <div className="max-w-4xl mx-auto space-y-4">
+        <div className="flex-1 flex-col overflow-y-auto">
+            <div className="max-w-4xl mx-auto space-y-4 p-4">
                 {messages.map((message) => (
                     <div
                         key={message.id}
@@ -92,10 +98,12 @@ const MessageArea = (props: MessageAreaProps) => {
                     </div>
                 ))}
 
+
                 {
                     geminiCallLoading &&
                     <LoadingIndicator />
                 }
+
 
                 <div ref={messagesEndRef} />
             </div>
@@ -103,11 +111,12 @@ const MessageArea = (props: MessageAreaProps) => {
     );
 }
 
+
 /**
- * LoadingIndicator component to show a loading state in the message area.
- * 
- * @returns LoadingIndicator component that displays a loading animation while waiting for a response from the bot.
- */
+* LoadingIndicator component to show a loading state in the message area.
+*
+* @returns LoadingIndicator component that displays a loading animation while waiting for a response from the bot.
+*/
 const LoadingIndicator = () => {
     return (
         <div className="flex items-start space-x-3">
@@ -124,5 +133,6 @@ const LoadingIndicator = () => {
         </div>
     );
 };
+
 
 export default MessageArea;

@@ -1,8 +1,10 @@
+
 import { Send } from "lucide-react";
 
+
 /**
- * Props for the InputArea component.
- */
+* Props for the InputArea component.
+*/
 interface InputAreaProps {
     /**
      * Function to handle sending a message.
@@ -22,13 +24,15 @@ interface InputAreaProps {
     geminiCallLoading: boolean;
 }
 
+
 /**
- * InputArea component of the chat application.
- * 
- * @returns InputArea component for sending messages in a chat application.
- */
+* InputArea component of the chat application.
+*
+* @returns InputArea component for sending messages in a chat application.
+*/
 const InputArea = (props: InputAreaProps) => {
     const { handleSendMessage, inputMessage, setInputMessage, geminiCallLoading } = props;
+
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (event.key === 'Enter') {
@@ -37,12 +41,15 @@ const InputArea = (props: InputAreaProps) => {
         }
     };
 
+
     const onInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const target: EventTarget & HTMLTextAreaElement = event.currentTarget;
+
 
         target.style.height = 'auto';
         target.style.height = target.scrollHeight + 'px';
     }
+
 
     return (
         <div className="bg-white border-t border-gray-200 p-4">
@@ -59,7 +66,7 @@ const InputArea = (props: InputAreaProps) => {
                 <button
                     onClick={handleSendMessage}
                     disabled={!inputMessage.trim() || geminiCallLoading}
-                    className="flex-none bg-blue-500 text-white p-3 rounded-2xl hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex-none bg-blue-500 text-white p-3 rounded-2xl hover:bg-blue-600 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
                 >
                     <Send className="w-5 h-5" />
                 </button>
@@ -67,5 +74,6 @@ const InputArea = (props: InputAreaProps) => {
         </div>
     );
 }
+
 
 export default InputArea;
