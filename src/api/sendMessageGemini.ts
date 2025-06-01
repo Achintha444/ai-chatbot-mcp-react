@@ -6,6 +6,11 @@ import { GoogleGenAI } from '@google/genai';
 let genai: GoogleGenAI | null = null;
 
 /**
+ * Model for a message in the chat application.
+ */
+const model: string = 'gemini-2.0-flash';
+
+/**
  * Initializes the Google Gemini API client with the provided API key.
  *
  * @param apiKey - The API key for authenticating with the Google Gemini API.
@@ -22,7 +27,7 @@ export const initializeGenAIInstance = (apiKey: string) => {
 export const sendMessageToGemini = async (message: string): Promise<string> => {
     try {
         const response = await genai?.models.generateContent({
-            model: 'gemini-2.0-flash',
+            model: model,
             contents: message,
         });
 
