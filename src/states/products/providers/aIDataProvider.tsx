@@ -32,6 +32,11 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
     // Initialize MCP service on mount
     useEffect(() => {
         const initializeMCP = async () => {
+            if (mcpServiceRef.current) {
+                // Clean up existing connection
+                await mcpServiceRef.current.close();
+            }
+
             try {
                 mcpServiceRef.current = new MCPFigmaService();
                 await mcpServiceRef.current.initialize();
@@ -44,8 +49,27 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
 
         // Only initialize if Figma MCP integration is enabled
         if (enableFigmaMCP) {
+            console.log('Initializing MCP Figma service...');
             initializeMCP();
+        } else {
+            // Clean up MCP service if it was initialized
+            if (mcpServiceRef.current) {
+                console.log('Disabling MCP Figma service...');
+                mcpServiceRef.current.close().catch(err => {
+                    console.error('Failed to close MCP Figma service:', err);
+                });
+                mcpServiceRef.current = null;
+            }
+            setMcpConnected(false);
         }
+
+        // Cleanup on unmount
+        return () => {
+            if (mcpServiceRef.current) {
+                mcpServiceRef.current.close();
+                mcpServiceRef.current = null;
+            }
+        };
 
     }, [enableFigmaMCP]);
 
@@ -82,7 +106,7 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
         setGeminiCallError(null);
 
         try {
-            let contextualMessage = message;
+            let contextualMessage: string = message;
 
             // Add Figma context if requested and available
             if (enableFigmaMCP && mcpConnected) {
