@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Hedaer from './components/header';
-import InputArea from './components/input_area';
-import MessageArea from './components/message_area';
-import SettingsPanel from './components/settings_panel';
+import InputArea from './components/inputArea';
+import MessageArea from './components/messageArea';
+import SettingsPanel from './components/settingsPanel';
 import type { Message } from './models/models';
 import useAIData from './states/products/hooks/useAIData';
 
@@ -11,7 +11,7 @@ const GeminiChatbot = () => {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [apiKey, setApiKey] = useState('');
+  
   const [showSettings, setShowSettings] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -69,7 +69,7 @@ const GeminiChatbot = () => {
     setInputMessage('');
 
     // Call the Gemini AI service with the user's message and API key
-    handleSendMessageToGemini(userMessage.text, apiKey);
+    handleSendMessageToGemini(userMessage.text);
   };
 
   return (
@@ -80,8 +80,6 @@ const GeminiChatbot = () => {
       {/* Settings Panel */}
       {showSettings && (
         <SettingsPanel
-          apiKey={apiKey}
-          setApiKey={setApiKey}
           setShowSettings={setShowSettings}
         />
       )}

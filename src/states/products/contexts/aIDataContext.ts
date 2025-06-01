@@ -5,12 +5,17 @@ import { createContext, type Context } from "react";
  */
 export interface AIDataContextProps {
     /**
+     * Initializes the Google Gemini API client with the provided API key.
+     * @param apiKey - The API key for authenticating with the Google Gemini API.
+     */
+    initializeGenAI: (apiKey: string) => void;
+
+    /**
      * Sends a message to the Gemini AI service and returns the response.
      * @param message - The message to send to the AI service.
-     * @param apiKey - The API key for authenticating with the Gemini service.
      * @returns A promise that resolves to the AI's response.
      */
-    handleSendMessageToGemini: (message: string, apiKey: string) => void;
+    handleSendMessageToGemini: (message: string) => void;
 
     /**
      * Response from the Gemini AI service.

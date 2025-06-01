@@ -1,5 +1,5 @@
 import type { FunctionComponent, PropsWithChildren, ReactElement } from "react";
-import sendMessageToGemini from "../../../api/send_message_gemini";
+import { initializeGenAIInstance, sendMessageToGemini } from "../../../api/sendMessageGemini";
 import AIDataContext from "../contexts/aIDataContext";
 import { useState } from 'react';
 
@@ -23,16 +23,28 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
     const [geminCallResponse, setGeminiCallResponse] = useState<string | null>(null);
 
     /**
+     * Initializes the Google Gemini API client with the provided API key.
+     * 
+     * @param apiKey - The API key for authenticating with the Google Gemini API.
+     */
+    const initializeGenAI = (apiKey: string) => {
+        if (!apiKey) {
+            throw new Error('Please set your Google Gemini API key in settings');
+        }
+        // Assuming sendMessageToGemini initializes the client internally
+        initializeGenAIInstance(apiKey);
+    };
+
+    /**
      * Handles sending a message to the Gemini AI service.
      *
      * @param message - The message to send to the AI service.
-     * @param apiKey - The API key for authenticating with the Gemini service.
      */
-    const handleSendMessageToGemini = async (message: string, apiKey: string) => {
+    const handleSendMessageToGemini = async (message: string) => {
         setGeminiCallLoading(true);
 
         try {
-            const result = await sendMessageToGemini(message, apiKey);
+            const result = await sendMessageToGemini(message);
             setGeminiCallResponse(result);
             setGeminiCallError(null);
         } catch (error) {
@@ -50,6 +62,7 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
     return (
         <AIDataContext.Provider
             value={{
+                initializeGenAI: initializeGenAI,
                 handleSendMessageToGemini: handleSendMessageToGemini,
                 geminiCallResponse: geminCallResponse,
                 geminiCallLoading: geminCallLoading,
