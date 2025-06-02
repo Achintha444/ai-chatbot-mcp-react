@@ -2,6 +2,7 @@ import type { FunctionComponent, PropsWithChildren, ReactElement } from "react";
 import { initializeGenAIInstance, sendMessageToGemini } from "../../../api/sendMessageGemini";
 import AIDataContext from "../contexts/aIDataContext";
 import { useState } from 'react';
+import { McpClient } from "../../../api/mcp/mcpClient";
 
 /**
  * Props interface for the [AIDataProvider]
@@ -18,6 +19,7 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
     props: AIDataProviderProps
 ): ReactElement => {
     const { children } = props;
+
     const [geminCallLoading, setGeminiCallLoading] = useState(false);
     const [geminiCallError, setGeminiCallError] = useState<string | null>(null);
     const [geminCallResponse, setGeminiCallResponse] = useState<string | null>(null);
@@ -31,6 +33,10 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
         if (!apiKey) {
             throw new Error('Please set your Google Gemini API key in settings');
         }
+
+        const mcpClient = new McpClient();
+        mcpClient.initialize();
+
         // Assuming sendMessageToGemini initializes the client internally
         initializeGenAIInstance(apiKey);
     };
