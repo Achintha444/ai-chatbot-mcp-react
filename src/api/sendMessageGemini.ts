@@ -144,7 +144,6 @@ export const sendMessageToGemini = async (
             return followUpResponse.text;
         }
 
-
         return response.text;
     } catch (error) {
         if (error instanceof Error) {
