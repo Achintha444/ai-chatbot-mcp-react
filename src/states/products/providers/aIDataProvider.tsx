@@ -78,9 +78,7 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
         await newMcpClient.initialize();
 
         availableMCPServers.set(
-            mcpClientIdentifier, new McpClient(
-                availableMCPServerUrls.get(mcpClientIdentifier)!,
-        )
+            mcpClientIdentifier, newMcpClient,
         );
 
         setEnableMCPClients(availableMCPServers);

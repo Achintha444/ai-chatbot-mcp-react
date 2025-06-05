@@ -1,5 +1,6 @@
 import { useState } from "react";
 import useAIData from "../states/products/hooks/useAIData";
+import { figmaMCPServerUniqueId } from "../assets/mcpServers";
 
 /**
 * Interface for the Settings component props.
@@ -25,7 +26,7 @@ const SettingsPanel = (props: SettingsPanelProps) => {
     // State to hold the API key input by the user
     const [apiKey, setApiKey] = useState('');
 
-    const { initializeGenAI } = useAIData();
+    const { initializeGenAI, addMcpClientToContext, removeMcpClientFromContext } = useAIData();
 
     /**
      * Initialize the Google Gemini API client with the provided API key.
@@ -49,7 +50,12 @@ const SettingsPanel = (props: SettingsPanelProps) => {
      */
     const handleFigmaMCPChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         console.log("Figma MCP Server toggle changed:", event.target.checked);
-        //setEnableFigmaMCP(event.target.checked);
+        
+        if (event.target.checked) {
+            addMcpClientToContext(figmaMCPServerUniqueId);
+        } else {
+            removeMcpClientFromContext(figmaMCPServerUniqueId);
+        }
     };
 
 
