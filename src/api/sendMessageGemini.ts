@@ -28,7 +28,7 @@ export const initializeGenAIInstance = (apiKey: string) => {
 export const sendMessageToGemini = async (
     message: string,
     enabledMcpClients: McpClient[],
-): Promise<string|undefined> => {
+): Promise<string | undefined> => {
     try {
         const allFunctionDeclarations: FunctionDeclaration[] = [];
         const allTools: Map<string, McpClient> = new Map();
@@ -43,22 +43,28 @@ export const sendMessageToGemini = async (
             });
         }
 
+        // Initial content structure
+        const initialContent = {
+            role: 'user',
+            parts: [{ text: message }]
+        };
+
         // Send the message to the Gemini API
         const response: GenerateContentResponse | undefined = await genai?.models.generateContent({
             model: model,
-            contents: message,
+            contents: [ initialContent ],
             config: {
                 tools: allFunctionDeclarations.length > 0 ? [
                     { functionDeclarations: allFunctionDeclarations }
                 ] : undefined,
                 toolConfig: allFunctionDeclarations.length > 0 ? {
                     functionCallingConfig: {
-                        mode: FunctionCallingConfigMode.AUTO
+                        mode: FunctionCallingConfigMode.ANY
                     }
                 } : undefined
             }
         });
-        
+
         if (!response) {
             throw new Error('Failed to get response from Gemini');
         }
@@ -66,7 +72,7 @@ export const sendMessageToGemini = async (
         // Process function calls to see if any mcp tools need to be called
         if (response.functionCalls && response.functionCalls.length > 0) {
             const functionResults = [];
-            
+
             for (const functionCall of response.functionCalls) {
                 const { name, args } = functionCall;
 
@@ -78,10 +84,10 @@ export const sendMessageToGemini = async (
                 }
 
                 const mcpResult = await mcpClient.executeTool(
-                    name!, 
+                    name!,
                     args!
                 );
-                
+
                 functionResults.push({
                     name: name,
                     response: {
@@ -91,26 +97,53 @@ export const sendMessageToGemini = async (
                 });
             }
 
-            const followUpResponse: GenerateContentResponse = await genai!.models.generateContent({
-                model: model,
-                contents: [
-                    message,
-                    ...response.functionCalls.map(fc => ({
-                        role: 'tool',
-                        functionCall: fc
-                    })),
-                    ...functionResults.map(result => ({
-                        role: 'tool',
+            console.log(functionResults);
+
+
+            // Build the conversation history properly
+            const conversationHistory = [
+                // Original user message
+                initialContent,
+                // Model's response with function calls
+                {
+                    role: 'model',
+                    parts: response.functionCalls.map(fc => ({
+                        functionCall: {
+                            name: fc.name,
+                            args: fc.args
+                        }
+                    }))
+                },
+                // Function responses
+                ...functionResults.map(result => ({
+                    role: 'function',
+                    parts: [{
                         functionResponse: {
                             name: result.name,
                             response: result.response
                         }
-                    }))
-                ]
+                    }]
+                }))
+            ];
+
+            const followUpResponse: GenerateContentResponse = await genai!.models.generateContent({
+                model: model,
+                contents: conversationHistory,
+                config: {
+                    tools: allFunctionDeclarations.length > 0 ? [
+                        { functionDeclarations: allFunctionDeclarations }
+                    ] : undefined,
+                    toolConfig: allFunctionDeclarations.length > 0 ? {
+                        functionCallingConfig: {
+                            mode: FunctionCallingConfigMode.AUTO
+                        }
+                    } : undefined
+                }
             });
 
             return followUpResponse.text;
         }
+
 
         return response.text;
     } catch (error) {

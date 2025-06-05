@@ -108,6 +108,7 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
         await mcpClient.close();
 
         availableMCPServers.delete(mcpClientIdentifier);
+        setEnableMCPClients(availableMCPServers);
     }
 
     return (
