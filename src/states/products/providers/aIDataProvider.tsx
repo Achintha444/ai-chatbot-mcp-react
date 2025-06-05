@@ -49,7 +49,16 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
         setGeminiCallLoading(true);
 
         try {
-            const result = await sendMessageToGemini(message);
+            const result: string | undefined = await sendMessageToGemini(
+                message,
+                Array.from(enableMCPClients.values())
+            );
+
+            if (!result) {
+                setGeminiCallError('No response from Gemini');
+                return;
+            }
+
             setGeminiCallResponse(result);
             setGeminiCallError(null);
         } catch (error) {

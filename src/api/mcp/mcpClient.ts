@@ -154,17 +154,54 @@ export class McpClient {
     /**
      * Converts MCP tools to Gemini function declarations.
      */
-    public convertToolsToGeminiFunctions(mcpTools: Tool[]): FunctionDeclaration[] {
+    public async convertAllToolsToGeminiFunctions(): Promise<FunctionDeclaration[]> {
+        const mcpTools: Tool[] = await this.getAvailableTools();
+
         return mcpTools.map(tool => ({
             name: tool.name,
             description: tool.description,
             parameters: {
                 type: Type.OBJECT,
                 description: tool.description,
-                properties: tool.inputSchema?.properties as Record<string, Schema> || {},
+                properties: this.sanitizeSchemaProperties(tool.inputSchema?.properties),
                 required: tool.inputSchema?.required || []
             }
         }));
+    }
+
+    /**
+     * To sanitize MCP schema properties, to pass to google gemini
+     * 
+     * @param properties - Schema properties to sanitize
+     * @returns - Sanitized schema properties
+     */
+    private sanitizeSchemaProperties(
+        properties: Record<string, any> | undefined
+    ): Record<string, Schema> {
+        if (!properties) return {};
+        
+        // Create a Set of allowed keys from the Schema type
+        const allowedKeys = new Set<keyof Schema>([
+            'anyOf',  'type', 'properties', 'items', 'required', 'nullable',
+            'format', 'description', 'enum', 'default', 'example', 'maxItems', 'maxLength',
+            'maxProperties', 'maximum', 'minItems', 'minLength', 'minProperties', 'minimum',
+            'pattern', 'propertyOrdering'
+        ]);
+
+        const sanitized: Record<string, Schema> = {};
+        
+        for (const [key, value] of Object.entries(properties)) {
+            // Create a new object with only allowed properties
+            const sanitizedValue: Partial<Schema> = {};
+            for (const prop of Object.keys(value)) {
+                if (allowedKeys.has(prop as keyof Schema)) {
+                    sanitizedValue[prop as keyof Schema] = value[prop];
+                }
+            }
+            sanitized[key] = sanitizedValue as Schema;
+        }
+        
+        return sanitized;
     }
 
     /**
