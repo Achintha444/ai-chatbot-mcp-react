@@ -31,6 +31,16 @@ export interface AIDataContextProps {
      * Error message from the Gemini AI service call, if any.
      */
     geminiCallError: string | null;
+    
+    /**
+     * Add mcp client to the context
+     */
+    addMcpClientToContext: (mcpClientIdentifier: string) => Promise<void>;
+
+    /**
+     * Remove mcp client from the context
+     */
+    removeMcpClientFromContext: (mcpClientIdentifier: string) => Promise<void>;
 }
 
 /**

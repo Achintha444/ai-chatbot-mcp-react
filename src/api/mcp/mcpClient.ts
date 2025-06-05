@@ -23,6 +23,20 @@ export class McpClient {
     private client: Client | null = null;
 
     /**
+     * Default MCP server URL
+     */
+    private mcpServerUrl!: string;
+
+    /**
+     * MCP Client constructor
+     * 
+     * @param mcpServerUrl - URL of the MCP server
+     */
+    constructor(mcpServerUrl: string) {
+        this.mcpServerUrl = mcpServerUrl;
+    }
+
+    /**
      * Initializes the MCP client with the given server command and arguments.
      */
     public async initialize(): Promise<void> {
@@ -32,7 +46,7 @@ export class McpClient {
 
         try {
             const transport = new SSEClientTransport(
-                new URL("/sse", "http://localhost:3333"),
+                new URL("/sse", this.mcpServerUrl),
             );
 
             this.client = new Client(

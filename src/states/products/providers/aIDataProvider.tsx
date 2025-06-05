@@ -1,8 +1,9 @@
 import type { FunctionComponent, PropsWithChildren, ReactElement } from "react";
-import { initializeGenAIInstance, sendMessageToGemini } from "../../../api/sendMessageGemini";
-import AIDataContext from "../contexts/aIDataContext";
 import { useState } from 'react';
 import { McpClient } from "../../../api/mcp/mcpClient";
+import { initializeGenAIInstance, sendMessageToGemini } from "../../../api/sendMessageGemini";
+import { availableMCPServerUrls } from "../../../assets/mcpServers";
+import AIDataContext from "../contexts/aIDataContext";
 
 /**
  * Props interface for the [AIDataProvider]
@@ -23,6 +24,7 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
     const [geminCallLoading, setGeminiCallLoading] = useState(false);
     const [geminiCallError, setGeminiCallError] = useState<string | null>(null);
     const [geminCallResponse, setGeminiCallResponse] = useState<string | null>(null);
+    const [enableMCPClients, setEnableMCPClients] = useState<Map<string, McpClient>>(new Map());
 
     /**
      * Initializes the Google Gemini API client with the provided API key.
@@ -33,9 +35,6 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
         if (!apiKey) {
             throw new Error('Please set your Google Gemini API key in settings');
         }
-
-        const mcpClient = new McpClient();
-        mcpClient.initialize();
 
         // Assuming sendMessageToGemini initializes the client internally
         initializeGenAIInstance(apiKey);
@@ -65,6 +64,45 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
         }
     };
 
+    /**
+     * Add mcp client to the context
+     */
+    const addMcpClientToContext = async (mcpClientIdentifier: string) => {
+        if (enableMCPClients.get(mcpClientIdentifier)) {
+            return;
+        }
+
+        const availableMCPServers: Map<string, McpClient> = new Map(enableMCPClients);
+        const newMcpClient: McpClient = new McpClient(availableMCPServerUrls.get(mcpClientIdentifier)!);
+
+        await newMcpClient.initialize();
+
+        availableMCPServers.set(
+            mcpClientIdentifier, new McpClient(
+                availableMCPServerUrls.get(mcpClientIdentifier)!,
+        )
+        );
+
+        setEnableMCPClients(availableMCPServers);
+    }
+
+    /**
+     * Remove mcp client from the context
+     */
+    const removeMcpClientFromContext = async (mcpClientIdentifier: string) => {
+        if (!enableMCPClients.get(mcpClientIdentifier)) {
+            return;
+        }
+
+        const availableMCPServers: Map<string, McpClient> = new Map(enableMCPClients);
+        const mcpClient: McpClient = availableMCPServers.get(mcpClientIdentifier)!;
+
+        // close the connection
+        await mcpClient.close();
+
+        availableMCPServers.delete(mcpClientIdentifier);
+    }
+
     return (
         <AIDataContext.Provider
             value={{
@@ -72,7 +110,9 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
                 handleSendMessageToGemini: handleSendMessageToGemini,
                 geminiCallResponse: geminCallResponse,
                 geminiCallLoading: geminCallLoading,
-                geminiCallError: geminiCallError
+                geminiCallError: geminiCallError,
+                addMcpClientToContext: addMcpClientToContext,
+                removeMcpClientFromContext: removeMcpClientFromContext,
             }}
         >
             {children}
