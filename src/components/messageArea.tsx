@@ -82,11 +82,9 @@ const MessageArea = (props: MessageAreaProps) => {
                                     : 'bg-white text-gray-800 shadow-sm border border-gray-200'
                                 }`}
                             >
-                                <p className="whitespace-pre-wrap break-words">
-                                    <ReactMarkdown>
-                                        {message.text}
-                                    </ReactMarkdown>
-                                </p>
+                                <ReactMarkdown>
+                                    {message.text}
+                                </ReactMarkdown>
                             </div>
                             <p className={
                                 `text-xs text-gray-500 mt-1 ${message.sender === 'user' ? 'text-right' : ''
