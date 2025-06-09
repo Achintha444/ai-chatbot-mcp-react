@@ -41,6 +41,11 @@ export interface AIDataContextProps {
      * Remove mcp client from the context
      */
     removeMcpClientFromContext: (mcpClientIdentifier: string) => Promise<void>;
+
+    /**
+     * Check if mcp client is available in the context
+     */
+    isMcpClientEnabled: (mcpClientIdentifier: string) => boolean;
 }
 
 /**

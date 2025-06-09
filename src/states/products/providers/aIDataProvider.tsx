@@ -111,6 +111,13 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
         setEnableMCPClients(availableMCPServers);
     }
 
+    /**
+     * Check if given mcp client is enabled
+     */
+    const isMcpClientEnabled = (mcpClientIdentifier: string) => {
+        return enableMCPClients.has(mcpClientIdentifier);
+    }
+
     return (
         <AIDataContext.Provider
             value={{
@@ -121,6 +128,7 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
                 geminiCallError: geminiCallError,
                 addMcpClientToContext: addMcpClientToContext,
                 removeMcpClientFromContext: removeMcpClientFromContext,
+                isMcpClientEnabled: isMcpClientEnabled,
             }}
         >
             {children}
