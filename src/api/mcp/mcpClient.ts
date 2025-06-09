@@ -2,6 +2,7 @@
 import { Type, type FunctionDeclaration, type Schema } from "@google/genai";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { ImageContent, TextContent, Tool } from "@modelcontextprotocol/sdk/types.js";
 
 /**
@@ -62,7 +63,43 @@ export class McpClient {
             );
 
             await this.client.connect(transport);
-            
+
+            console.log('MCP client connected successfully');
+        } catch (error) {
+            console.error('Failed to initialize MCP client:', error);
+            throw new Error(`MCP client initialization failed: ${error}`);
+        }
+    }
+
+    /**
+     * Initializes the MCP client with the given server command and arguments.
+     * 
+     * TODO: WORKING PROGRESS
+     */
+    public async initializeWithStreamedHTTP(): Promise<void> {
+        if (this.client) {
+            throw new Error('MCP client is already initialized');
+        }
+
+        try {
+            const transport = new StreamableHTTPClientTransport(
+                new URL("/mcp", this.mcpServerUrl),
+            );
+
+            this.client = new Client(
+                {
+                    name: 'gemini-figma-client',
+                    version: '1.0.0',
+                },
+                {
+                    capabilities: {
+                        tools: {},
+                    },
+                }
+            );
+
+            await this.client.connect(transport);
+
             console.log('MCP client connected successfully');
         } catch (error) {
             console.error('Failed to initialize MCP client:', error);
@@ -179,17 +216,17 @@ export class McpClient {
         properties: Record<string, any> | undefined
     ): Record<string, Schema> {
         if (!properties) return {};
-        
+
         // Create a Set of allowed keys from the Schema type
         const allowedKeys = new Set<keyof Schema>([
-            'anyOf',  'type', 'properties', 'items', 'required', 'nullable',
+            'anyOf', 'type', 'properties', 'items', 'required', 'nullable',
             'format', 'description', 'enum', 'default', 'example', 'maxItems', 'maxLength',
             'maxProperties', 'maximum', 'minItems', 'minLength', 'minProperties', 'minimum',
             'pattern', 'propertyOrdering'
         ]);
 
         const sanitized: Record<string, Schema> = {};
-        
+
         for (const [key, value] of Object.entries(properties)) {
             // Create a new object with only allowed properties
             const sanitizedValue: Partial<Schema> = {};
@@ -200,7 +237,7 @@ export class McpClient {
             }
             sanitized[key] = sanitizedValue as Schema;
         }
-        
+
         return sanitized;
     }
 
