@@ -59,7 +59,7 @@ export const sendMessageToGemini = async (
                 ] : undefined,
                 toolConfig: allFunctionDeclarations.length > 0 ? {
                     functionCallingConfig: {
-                        mode: FunctionCallingConfigMode.NONE
+                        mode: FunctionCallingConfigMode.ANY,
                     }
                 } : undefined
             }
