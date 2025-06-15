@@ -52,7 +52,7 @@ export class McpClient {
 
             this.client = new Client(
                 {
-                    name: 'gemini-figma-client',
+                    name: 'gemini-figma-client-sse',
                     version: '1.0.0',
                 },
                 {
