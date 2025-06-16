@@ -1,8 +1,9 @@
 import type { FunctionComponent, PropsWithChildren, ReactElement } from "react";
-import sendMessageToGemini from "../../../api/send_message_gemini";
+import { useState } from 'react';
+import { McpClient } from "../../../api/mcp/mcpClient";
+import { initializeGenAIInstance, sendMessageToGemini } from "../../../api/sendMessageGemini";
+import { availableMCPServerUrls } from "../../../assets/mcpServers";
 import AIDataContext from "../contexts/aIDataContext";
-import { useState, useCallback, useRef, useEffect } from 'react';
-import MCPFigmaService from "../../../api/mcp/figma_mcp_service";
 
 /**
  * Props interface for the [AIDataProvider]
@@ -10,7 +11,7 @@ import MCPFigmaService from "../../../api/mcp/figma_mcp_service";
 export type AIDataProviderProps = PropsWithChildren;
 
 /**
- * React context provider for the AI data with Figma MCP integration.
+ * React context provider for the AI data.
  *
  * @param props - Props injected to the component.
  * @returns Internal authentication data context instance.
@@ -20,115 +21,46 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
 ): ReactElement => {
     const { children } = props;
 
-    const [geminiCallLoading, setGeminiCallLoading] = useState(false);
+    const [geminCallLoading, setGeminiCallLoading] = useState(false);
     const [geminiCallError, setGeminiCallError] = useState<string | null>(null);
-    const [geminiCallResponse, setGeminiCallResponse] = useState<string | null>(null);
-
-    const [enableFigmaMCP, setEnableFigmaMCP] = useState(false);
-    const [mcpConnected, setMcpConnected] = useState(false);
-
-    const mcpServiceRef = useRef<MCPFigmaService | null>(null);
-
-    // Initialize MCP service on mount
-    useEffect(() => {
-        const initializeMCP = async () => {
-            if (mcpServiceRef.current) {
-                // Clean up existing connection
-                await mcpServiceRef.current.close();
-            }
-
-            try {
-                mcpServiceRef.current = new MCPFigmaService();
-                await mcpServiceRef.current.initialize();
-                setMcpConnected(true);
-            } catch (error) {
-                console.error('Failed to initialize MCP Figma service:', error);
-                setMcpConnected(false);
-            }
-        };
-
-        // Only initialize if Figma MCP integration is enabled
-        if (enableFigmaMCP) {
-            console.log('Initializing MCP Figma service...');
-            initializeMCP();
-        } else {
-            // Clean up MCP service if it was initialized
-            if (mcpServiceRef.current) {
-                console.log('Disabling MCP Figma service...');
-                mcpServiceRef.current.close().catch(err => {
-                    console.error('Failed to close MCP Figma service:', err);
-                });
-                mcpServiceRef.current = null;
-            }
-            setMcpConnected(false);
-        }
-
-        // Cleanup on unmount
-        return () => {
-            if (mcpServiceRef.current) {
-                mcpServiceRef.current.close();
-                mcpServiceRef.current = null;
-            }
-        };
-
-    }, [enableFigmaMCP]);
+    const [geminCallResponse, setGeminiCallResponse] = useState<string | null>(null);
+    const [enableMCPClients, setEnableMCPClients] = useState<Map<string, McpClient>>(new Map());
 
     /**
-     * Fetch current Figma context from MCP server
+     * Initializes the Google Gemini API client with the provided API key.
+     * 
+     * @param apiKey - The API key for authenticating with the Google Gemini API.
      */
-    const fetchFigmaContext = useCallback(async (): Promise<string | null> => {
-        if (!mcpServiceRef.current || !mcpConnected) {
-            throw new Error('MCP Figma service not connected');
+    const initializeGenAI = (apiKey: string) => {
+        if (!apiKey) {
+            throw new Error('Please set your Google Gemini API key in settings');
         }
 
-        try {
-            const context = await mcpServiceRef.current.getFigmaContext();
-            const formattedContext = mcpServiceRef.current.formatContextForGemini(context);
-            return formattedContext;
-        } catch (error) {
-            console.error('Failed to fetch Figma context:', error);
-            throw error;
-        }
-    }, [mcpConnected]);
+        // Assuming sendMessageToGemini initializes the client internally
+        initializeGenAIInstance(apiKey);
+    };
 
     /**
-     * Handles sending a message to the Gemini AI service with optional Figma context.
+     * Handles sending a message to the Gemini AI service.
      *
      * @param message - The message to send to the AI service.
-     * @param apiKey - The API key for authenticating with the Gemini service.
-     * @param includeFigmaContext - Whether to include current Figma context in the message.
      */
-    const handleSendMessageToGemini = async (
-        message: string,
-        apiKey: string,
-    ) => {
+    const handleSendMessageToGemini = async (message: string) => {
         setGeminiCallLoading(true);
-        setGeminiCallError(null);
 
         try {
-            let contextualMessage: string = message;
+            const result: string | undefined = await sendMessageToGemini(
+                message,
+                Array.from(enableMCPClients.values())
+            );
 
-            // Add Figma context if requested and available
-            if (enableFigmaMCP && mcpConnected) {
-                try {
-                    const context: string | null = await fetchFigmaContext();
-
-                    // If context is available, prepend it to the message
-                    if (context) {
-                        contextualMessage = `${context}\n\nUser Question: ${message}`;
-                    } else {
-                        contextualMessage = `User Question: ${message}`;
-                    }
-                } catch (contextError) {
-                    console.warn('Failed to fetch Figma context, proceeding without it:', contextError);
-                    // Continue with original message if context fetch fails
-                }
+            if (!result) {
+                setGeminiCallError('No response from Gemini');
+                return;
             }
 
-            // Send the message to Gemini API
-            const result: string = await sendMessageToGemini(contextualMessage, apiKey);
-
             setGeminiCallResponse(result);
+            setGeminiCallError(null);
         } catch (error) {
             if (error instanceof Error) {
                 setGeminiCallError(error.message || 'An error occurred while sending the message to Gemini');
@@ -141,18 +73,62 @@ const AIDataProvider: FunctionComponent<AIDataProviderProps> = (
         }
     };
 
+    /**
+     * Add mcp client to the context
+     */
+    const addMcpClientToContext = async (mcpClientIdentifier: string) => {
+        if (enableMCPClients.get(mcpClientIdentifier)) {
+            return;
+        }
+
+        const availableMCPServers: Map<string, McpClient> = new Map(enableMCPClients);
+        const newMcpClient: McpClient = new McpClient(availableMCPServerUrls.get(mcpClientIdentifier)!);
+
+        await newMcpClient.initialize();
+
+        availableMCPServers.set(
+            mcpClientIdentifier, newMcpClient,
+        );
+
+        setEnableMCPClients(availableMCPServers);
+    }
+
+    /**
+     * Remove mcp client from the context
+     */
+    const removeMcpClientFromContext = async (mcpClientIdentifier: string) => {
+        if (!enableMCPClients.get(mcpClientIdentifier)) {
+            return;
+        }
+
+        const availableMCPServers: Map<string, McpClient> = new Map(enableMCPClients);
+        const mcpClient: McpClient = availableMCPServers.get(mcpClientIdentifier)!;
+
+        // close the connection
+        await mcpClient.close();
+
+        availableMCPServers.delete(mcpClientIdentifier);
+        setEnableMCPClients(availableMCPServers);
+    }
+
+    /**
+     * Check if given mcp client is enabled
+     */
+    const isMcpClientEnabled = (mcpClientIdentifier: string) => {
+        return enableMCPClients.has(mcpClientIdentifier);
+    }
+
     return (
         <AIDataContext.Provider
             value={{
-                // Original Gemini functionality
+                initializeGenAI: initializeGenAI,
                 handleSendMessageToGemini: handleSendMessageToGemini,
-                geminiCallResponse: geminiCallResponse,
-                geminiCallLoading: geminiCallLoading,
+                geminiCallResponse: geminCallResponse,
+                geminiCallLoading: geminCallLoading,
                 geminiCallError: geminiCallError,
-
-                // Figma MCP integration
-                setEnableFigmaMCP: setEnableFigmaMCP,
-                enableFigmaMCP: enableFigmaMCP,
+                addMcpClientToContext: addMcpClientToContext,
+                removeMcpClientFromContext: removeMcpClientFromContext,
+                isMcpClientEnabled: isMcpClientEnabled,
             }}
         >
             {children}

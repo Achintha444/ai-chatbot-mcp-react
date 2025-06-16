@@ -1,8 +1,10 @@
+
 import { Send } from "lucide-react";
 
+
 /**
- * Props for the InputArea component.
- */
+* Props for the InputArea component.
+*/
 interface InputAreaProps {
     /**
      * Function to handle sending a message.
@@ -22,13 +24,15 @@ interface InputAreaProps {
     geminiCallLoading: boolean;
 }
 
+
 /**
- * InputArea component of the chat application.
- * 
- * @returns InputArea component for sending messages in a chat application.
- */
+* InputArea component of the chat application.
+*
+* @returns InputArea component for sending messages in a chat application.
+*/
 const InputArea = (props: InputAreaProps) => {
     const { handleSendMessage, inputMessage, setInputMessage, geminiCallLoading } = props;
+
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (event.key === 'Enter') {
@@ -37,12 +41,15 @@ const InputArea = (props: InputAreaProps) => {
         }
     };
 
+
     const onInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const target: EventTarget & HTMLTextAreaElement = event.currentTarget;
+
 
         target.style.height = 'auto';
         target.style.height = target.scrollHeight + 'px';
     }
+
 
     return (
         <div className="bg-white border-t border-gray-200 p-4">
@@ -67,5 +74,6 @@ const InputArea = (props: InputAreaProps) => {
         </div>
     );
 }
+
 
 export default InputArea;

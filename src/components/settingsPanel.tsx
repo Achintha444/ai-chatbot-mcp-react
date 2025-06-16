@@ -1,43 +1,68 @@
+import { useEffect, useState } from "react";
 import useAIData from "../states/products/hooks/useAIData";
+import { figmaMCPServerUniqueId } from "../assets/mcpServers";
 
 /**
- * Interface for the Settings component props.
- */
+* Interface for the Settings component props.
+*/
 interface SettingsPanelProps {
     /**
-     * The current API key for Google Gemini.
-     */
-    apiKey: string;
-    /**
-     * Function to update the API key.
-     * 
-     * @param key - The new API key to set.
-     */
-    setApiKey: (key: string) => void;
-    /**
      * Function to toggle the visibility of the settings panel.
-     * 
+     *
      * @param show - Boolean indicating whether to show or hide the settings.
      */
     setShowSettings: (show: boolean) => void;
 }
 
-/**
- * Tthe settings component allows users to configure their API key for Google Gemini.
- * 
- * @returns A React component for configuring API settings.
- */
-const SettingsPanel = (props: SettingsPanelProps) => {
-    const { apiKey, setApiKey, setShowSettings } = props;
 
-    const { enableFigmaMCP, setEnableFigmaMCP } = useAIData(); 
+/**
+* Tthe settings component allows users to configure their API key for Google Gemini.
+*
+* @returns A React component for configuring API settings.
+*/
+const SettingsPanel = (props: SettingsPanelProps) => {
+    const { setShowSettings } = props;
+
+    // State to hold the API key input by the user
+    const [apiKey, setApiKey] = useState('');
+    const [isFigmaMCPClientEnabled, setIsFigmaMCPCientEnabled] = useState(false);
+
+    const { initializeGenAI, addMcpClientToContext, removeMcpClientFromContext, isMcpClientEnabled } = useAIData();
+
+    useEffect(() => {
+        setIsFigmaMCPCientEnabled(isMcpClientEnabled(figmaMCPServerUniqueId));
+    }, [isMcpClientEnabled]);
+    
+    /**
+     * Initialize the Google Gemini API client with the provided API key.
+     */
+    const handleSaveApiKey = () => {
+        if (!apiKey.trim()) {
+            console.error("API key cannot be empty");
+            return;
+        }
+        try {
+            initializeGenAI(apiKey);
+            console.log("Google Gemini API initialized with key:", apiKey);
+        } catch (error) {
+            console.error("Error initializing Google Gemini API:", error);
+        }
+        setShowSettings(false);
+    };
 
     /**
      * On change the Figma MCP server toggle, update the state.
      */
     const handleFigmaMCPChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setEnableFigmaMCP(event.target.checked);
+        console.log("Figma MCP Server toggle changed:", event.target.checked);
+        
+        if (event.target.checked) {
+            addMcpClientToContext(figmaMCPServerUniqueId);
+        } else {
+            removeMcpClientFromContext(figmaMCPServerUniqueId);
+        }
     };
+
 
     return (
         <div className="bg-yellow-50 border-b border-yellow-200">
@@ -53,7 +78,7 @@ const SettingsPanel = (props: SettingsPanelProps) => {
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
                         />
                         <button
-                            onClick={() => setShowSettings(false)}
+                            onClick={handleSaveApiKey}
                             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                         >
                             Save
@@ -74,7 +99,13 @@ const SettingsPanel = (props: SettingsPanelProps) => {
                                 Enable Figma MCP Server
                             </p>
                             <label className="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" value="" className="sr-only peer" checked={enableFigmaMCP} onChange={handleFigmaMCPChange} />
+                                <input 
+                                    type="checkbox" 
+                                    value="" 
+                                    className="sr-only peer" 
+                                    onChange={handleFigmaMCPChange} 
+                                    checked={isFigmaMCPClientEnabled} 
+                                />
                                 <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neutral-900" />
                             </label>
                         </div>
@@ -90,5 +121,6 @@ const SettingsPanel = (props: SettingsPanelProps) => {
         </div>
     );
 }
+
 
 export default SettingsPanel
