@@ -38,7 +38,7 @@ export class McpClient {
     }
 
     /**
-     * Initializes the MCP client with the given server command and arguments.
+     * Initializes the MCP client with [SSEClientTransport] the given server command and arguments.
      */
     public async initialize(): Promise<void> {
         if (this.client) {
@@ -72,9 +72,7 @@ export class McpClient {
     }
 
     /**
-     * Initializes the MCP client with the given server command and arguments.
-     * 
-     * TODO: WORKING PROGRESS
+     * Initializes the MCP client with [StreamableHTTPClientTransport] the given server command and arguments.
      */
     public async initializeWithStreamedHTTP(): Promise<void> {
         if (this.client) {
